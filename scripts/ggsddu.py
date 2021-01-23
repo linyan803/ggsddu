@@ -3,7 +3,7 @@
 import os
 import sys
 import sqlite3
-# import platform
+import platform
 from tkinter import Tk
 from PIL import Image, ImageTk
 from tkinter import Label
@@ -221,17 +221,14 @@ if __name__ == '__main__':
     # 创建主窗口
     root = Tk()
     root.title('The notebook of wrong questions for Li Zhenzhen')
-    '''
+
     if(platform.system()=='Windows'):
-        the_window.state("normal")
-        the_window.resizable(width=False, height=False)
+        FONT_NAME = 'Caribri'
     elif(platform.system()=='Linux'):
-        w = the_window.winfo_screenwidth()
-        h = the_window.winfo_screenheight()
-        the_window.geometry("%dx%d" %(w, h))
+        FONT_NAME = 'Century Schoolbook L'
     else:
         print('Can only support windows and linux')
-    '''
+
     width = 1200
     heigh = 600
     screenwidth = root.winfo_screenwidth()
