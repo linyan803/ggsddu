@@ -89,7 +89,7 @@ class App:
 
         self.single_blank_label_input = Label(self.frame,text='Input words:',font=(FONT_NAME,20,'bold'))
 
-        self.single_blank_entry_answer = Entry(self.frame, font=(FONT_NAME,16,'bold'), width=65)
+        self.single_blank_entry_answer = Entry(self.frame, font=(FONT_NAME,16,'bold'), width=35)
 
         self.single_blank_button_check = Button(self.frame, text="Check", command=self.check_answer,
             font=(FONT_NAME,20,'bold'), width=11, height=1)
@@ -141,13 +141,13 @@ class App:
             self.single_blank_label_answer.configure(fg="red")
         self.data_single_blank_answer_variable.set("%s. The words is: %s" %
             (correct_string, self.data_single_blank_answer_string))
-        self.single_blank_label_answer.place(x=100, y=580, anchor='nw')
+        self.single_blank_label_answer.place(x=100, y=480, anchor='nw')
         if self.data_single_blank_is_lastone:
             # print("show return")
-            self.single_blank_button_return.place(x=1100, y=580, anchor='nw')
+            self.single_blank_button_return.place(x=500, y=480, anchor='nw')
         else:
             # print("show next")
-            self.single_blank_button_next.place(x=1100, y=580, anchor='nw')
+            self.single_blank_button_next.place(x=800, y=480, anchor='nw')
 
 
     def next(self):
@@ -177,9 +177,9 @@ class App:
         # 显示/隐藏 科目组件
         if is_show:
             self.subject_label_bkg.place(x=0, y=0, anchor='nw')
-            self.subject_label_yuwen.place(x=150, y=300, anchor='nw')
-            self.subject_label_shuxue.place(x=600, y=300, anchor='nw')
-            self.subject_label_yinyu.place(x=1050, y=300, anchor='nw')
+            self.subject_label_yuwen.place(x=50, y=150, anchor='nw')
+            self.subject_label_shuxue.place(x=450, y=150, anchor='nw')
+            self.subject_label_yinyu.place(x=850, y=150, anchor='nw')
         else:
             self.subject_label_bkg.place_forget()
             self.subject_label_yuwen.place_forget()
@@ -199,10 +199,10 @@ class App:
                     text=self.data_single_blank_stem_string,
                     font=(FONT_NAME,16), anchor='nw', width=1000)
             self.single_blank_canvas_stem.place(x=100,y=100)
-            self.single_blank_label_input.place(x=100, y=520, anchor='nw')
-            self.single_blank_entry_answer.place(x=300, y=522, anchor='nw')
+            self.single_blank_label_input.place(x=100, y=420, anchor='nw')
+            self.single_blank_entry_answer.place(x=300, y=422, anchor='nw')
             self.single_blank_entry_answer.focus ()
-            self.single_blank_button_check.place(x=1100, y=515, anchor='nw')
+            self.single_blank_button_check.place(x=800, y=415, anchor='nw')
             # 点击check_button才能显示
             # self.single_blank_label_answer.place(x=100, y=580, anchor='nw')
             # self.single_blank_button_next.place(x=1100, y=580, anchor='nw')
@@ -232,8 +232,8 @@ if __name__ == '__main__':
     else:
         print('Can only support windows and linux')
     '''
-    width = 1600
-    heigh = 768
+    width = 1200
+    heigh = 600
     screenwidth = root.winfo_screenwidth()
     screenheight = root.winfo_screenheight()
     root.geometry('%dx%d+%d+%d'%(width, heigh, (screenwidth-width)/2, (screenheight-heigh)/2))
