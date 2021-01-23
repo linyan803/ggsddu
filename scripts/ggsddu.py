@@ -89,19 +89,19 @@ class App:
 
         self.single_blank_label_input = Label(self.frame,text='Input words:',font=(FONT_NAME,20,'bold'))
 
-        self.single_blank_entry_answer = Entry(self.frame, font=(FONT_NAME,16,'bold'), width=35)
+        self.single_blank_entry_answer = Entry(self.frame, font=(FONT_NAME,20,'bold'), width=32)
 
         self.single_blank_button_check = Button(self.frame, text="Check", command=self.check_answer,
-            font=(FONT_NAME,20,'bold'), width=11, height=1)
+            font=(FONT_NAME,16,'bold'), width=11)
 
         self.single_blank_label_answer = Label(self.frame, textvariable=
             self.data_single_blank_answer_variable,font=(FONT_NAME,20,'bold'))
                 
         self.single_blank_button_next = Button(self.frame, text="Next", command=self.next,
-            font=(FONT_NAME,20,'bold'), width=11, height=1)
+            font=(FONT_NAME,16,'bold'), width=11)
 
         self.single_blank_button_return = Button(self.frame, text="Return", command=self.entry,
-            font=(FONT_NAME,20,'bold'), width=11, height=1)
+            font=(FONT_NAME,16,'bold'), width=11)
 
 
     def entry(self):
@@ -144,10 +144,10 @@ class App:
         self.single_blank_label_answer.place(x=100, y=480, anchor='nw')
         if self.data_single_blank_is_lastone:
             # print("show return")
-            self.single_blank_button_return.place(x=500, y=480, anchor='nw')
+            self.single_blank_button_return.place(x=900, y=480, anchor='nw')
         else:
             # print("show next")
-            self.single_blank_button_next.place(x=800, y=480, anchor='nw')
+            self.single_blank_button_next.place(x=900, y=480, anchor='nw')
 
 
     def next(self):
@@ -202,7 +202,7 @@ class App:
             self.single_blank_label_input.place(x=100, y=420, anchor='nw')
             self.single_blank_entry_answer.place(x=300, y=422, anchor='nw')
             self.single_blank_entry_answer.focus ()
-            self.single_blank_button_check.place(x=800, y=415, anchor='nw')
+            self.single_blank_button_check.place(x=900, y=415, anchor='nw')
             # 点击check_button才能显示
             # self.single_blank_label_answer.place(x=100, y=580, anchor='nw')
             # self.single_blank_button_next.place(x=1100, y=580, anchor='nw')
@@ -222,9 +222,11 @@ if __name__ == '__main__':
     root = Tk()
     root.title('The notebook of wrong questions for Li Zhenzhen')
 
-    if(platform.system()=='Windows'):
-        FONT_NAME = 'Caribri'
-    elif(platform.system()=='Linux'):
+    system_name = platform.system()
+    # print(system_name)
+    if 'Windows' in system_name:
+        FONT_NAME = '微软雅黑'
+    elif 'Linux' in system_name:
         FONT_NAME = 'Century Schoolbook L'
     else:
         print('Can only support windows and linux')
