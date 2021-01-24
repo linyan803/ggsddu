@@ -306,10 +306,10 @@ class App:
             self.single_blank_value_weight.place_forget()
 
     def calc_new_weight(self):
-        times_weight = (1/2**self.data_single_blank_answer_times)*5
+        times_weight = 1/2**self.data_single_blank_correct_times
         rate_value = self.get_correct_rate()
-        rate_weight = 8**(-math.log(rate_value+0.0001))-1
-        # print(times_weight, rate_weight)
+        rate_weight = 0.05-math.log((rate_value+0.1)**2, 100)
+        print(times_weight, rate_weight)
         return times_weight+rate_weight
 
     '''
