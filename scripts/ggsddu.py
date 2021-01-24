@@ -2,10 +2,12 @@
 # -*- coding: UTF-8 -*-
 import os
 import sys
+import math
 import sqlite3
 import platform
 from tkinter import Tk
 from PIL import Image, ImageTk
+from tkinter import LabelFrame
 from tkinter import Label
 from tkinter import Canvas
 from tkinter import Entry
@@ -13,12 +15,13 @@ from tkinter import Button
 from tkinter import StringVar
 
 FONT_NAME = 'Century Schoolbook L'
-
+ENGLISH_SUBJECT = 3 # 英语为3
+WORDS_TYPE = 1 # 单词题为1
 SCRIPT_PATH = os.path.split(os.path.realpath(sys.argv[0]))[0]
 
 class App:
-    def __init__(self, frame):
-        self.frame = frame
+    def __init__(self, root):
+        self.root = root
         
         # 这里先定义所有科目widgets
         self.subject_label_bkg = None
@@ -27,17 +30,29 @@ class App:
         self.subject_label_yinyu = None
 
         # 定义单项填空题用到的widgets
-        self.single_blank_label_type = None     # 类型
+        self.single_blank_stem_frame = None
         self.single_blank_canvas_stem = None    # 题干画布
         self.single_blank_text_stem = None      # 题干中的text
-        self.single_blank_label_input = None    
-        self.single_blank_entry_answer = None   # 输入框
+
+        self.single_blank_input_frame = None
+        self.single_blank_entry_answer = None   # 输入
         self.single_blank_button_check = None   # 检查答案按钮
         self.single_blank_button_next = None    # 下一步按钮
         self.single_blank_button_return = None  # 返回按钮
         self.single_blank_label_answer = None  
 
+        self.single_blank_counting_frame = None
+        self.single_blank_label_times = None
+        self.single_blank_label_correct = None
+        self.single_blank_label_rate = None
+        self.single_blank_lable_weight = None
+        self.single_blank_value_times = None
+        self.single_blank_value_correct = None
+        self.single_blank_value_rate = None
+        self.single_blank_value_weight = None
+
         # 定义英语单词题用到的数据
+        self.data_single_blank_exercise_id = -1                    # 试题ID
         self.data_single_blank_stem_string = ''                    # 题干
         self.data_single_blank_is_correct = False                  # 答对没有
         self.data_single_blank_is_lastone = False                  # 还有没有下一题
@@ -47,8 +62,9 @@ class App:
         self.data_single_blank_answer_times_variable = StringVar() # 做过几次变量
         self.data_single_blank_correct_times = 0                   # 答对过几次
         self.data_single_blank_correct_variable = StringVar()      # 答对次数变量
-        self.data_single_blank_correct_rate = 0.0                  # 答对率
         self.data_single_blank_correct_rate_variable = StringVar() # 答对率变量
+        self.data_single_blank_weight = 0.0                        # 题目权重
+        self.data_single_blank_weight_variable = StringVar()       # 权重变量
 
         # 题目数据
         self.exercises_num = 0
@@ -71,38 +87,60 @@ class App:
         image_yinyu = Image.open(SCRIPT_PATH+"/../resource/yinyu.png")
         photo_yinyu = ImageTk.PhotoImage(image_yinyu)
     
-        self.subject_label_bkg = Label(self.frame,text='',image=photo_bkg)
+        self.subject_label_bkg = Label(self.root,text='',image=photo_bkg)
 
-        self.subject_label_yuwen = Label(self.frame, image=photo_yuwen, cursor="spraycan")
+        self.subject_label_yuwen = Label(self.root, image=photo_yuwen, cursor="spraycan")
         self.subject_label_yuwen.bind('<Button-1>', self.enter_yuwen)
 
-        self.subject_label_shuxue = Label(self.frame, image=photo_shuxue, cursor="spraycan")
+        self.subject_label_shuxue = Label(self.root, image=photo_shuxue, cursor="spraycan")
         self.subject_label_shuxue.bind('<Button-1>', self.enter_shuxue)
         
-        self.subject_label_yinyu = Label(self.frame, image=photo_yinyu, cursor="spraycan")
+        self.subject_label_yinyu = Label(self.root, image=photo_yinyu, cursor="spraycan")
         self.subject_label_yinyu.bind('<Button-1>', self.enter_yinyu)
-    
-        self.single_blank_label_type = Label(self.frame,text='Vocabulary:',font=(FONT_NAME,20,'bold'))
-        
-        self.single_blank_canvas_stem = Canvas(self.frame)
-        self.single_blank_canvas_stem.config(width=1000,height=400, relief='solid')
 
-        self.single_blank_label_input = Label(self.frame,text='Input words:',font=(FONT_NAME,20,'bold'))
+        self.single_blank_stem_frame = LabelFrame(self.root, text="Vocabulary", 
+            font=(FONT_NAME,20,'bold'), padx=5, pady=5, width=820, height=350)
+        self.single_blank_canvas_stem = Canvas(self.single_blank_stem_frame)
+        self.single_blank_canvas_stem.config(width=780,height=295, relief='solid')
 
-        self.single_blank_entry_answer = Entry(self.frame, font=(FONT_NAME,20,'bold'), width=32)
-
-        self.single_blank_button_check = Button(self.frame, text="Check", command=self.check_answer,
-            font=(FONT_NAME,16,'bold'), width=11)
-
-        self.single_blank_label_answer = Label(self.frame, textvariable=
+        self.single_blank_input_frame = LabelFrame(self.root, text="Input words", 
+            font=(FONT_NAME,20,'bold'), padx=5, pady=5, width=1100, height=150)
+        self.single_blank_entry_answer = Entry(self.single_blank_input_frame, 
+            font=(FONT_NAME,20,'bold'), width=50)
+        self.single_blank_entry_answer.bind("<Return>", self.check_english_words)  # 解决回车问题
+        self.single_blank_button_check = Button(self.single_blank_input_frame, text="Check", 
+            command=self.check_english_words, font=(FONT_NAME,16,'bold'), width=16)
+        self.single_blank_label_answer = Label(self.single_blank_input_frame, textvariable=
             self.data_single_blank_answer_variable,font=(FONT_NAME,20,'bold'))
-                
-        self.single_blank_button_next = Button(self.frame, text="Next", command=self.next,
-            font=(FONT_NAME,16,'bold'), width=11)
+        self.single_blank_button_next = Button(self.single_blank_input_frame, text="Next", 
+            command=self.next_english_words, font=(FONT_NAME,16,'bold'), width=16)
+        self.single_blank_button_next.bind("<Return>", self.next_english_words)  # 解决回车问题
+        self.single_blank_button_return = Button(self.single_blank_input_frame, text="Return",
+            command=self.entry, font=(FONT_NAME,16,'bold'), width=16)
+        self.single_blank_button_return.bind("<Return>", self.entry)  # 解决回车问题
 
-        self.single_blank_button_return = Button(self.frame, text="Return", command=self.entry,
-            font=(FONT_NAME,16,'bold'), width=11)
-
+        self.single_blank_counting_frame = LabelFrame(self.root, text="Counting", 
+            font=(FONT_NAME,20,'bold'), padx=5, pady=5, width=250, height=350)
+        self.single_blank_label_times = Label(self.single_blank_counting_frame, text=
+            "Times:",font=(FONT_NAME,16), wraplength=80, justify="right")
+        self.single_blank_label_correct = Label(self.single_blank_counting_frame, text=
+            "Correct:",font=(FONT_NAME,16), wraplength=80, justify="right")
+        self.single_blank_lable_rate = Label(self.single_blank_counting_frame, text=
+            "Rate:",font=(FONT_NAME,16), wraplength=80, justify="right")
+        self.single_blank_lable_weight = Label(self.single_blank_counting_frame, text=
+            "Weight:",font=(FONT_NAME,16), wraplength=80, justify="right")
+        self.single_blank_value_times = Label(self.single_blank_counting_frame, textvariable=
+            self.data_single_blank_answer_times_variable,font=(FONT_NAME,16),
+            wraplength=80, justify="left")
+        self.single_blank_value_correct = Label(self.single_blank_counting_frame, textvariable=
+            self.data_single_blank_correct_variable,font=(FONT_NAME,16),
+            wraplength=80, justify="left")
+        self.single_blank_value_rate = Label(self.single_blank_counting_frame, textvariable=
+            self.data_single_blank_correct_rate_variable,font=(FONT_NAME,16),
+            wraplength=80, justify="left")
+        self.single_blank_value_weight = Label(self.single_blank_counting_frame, textvariable=
+            self.data_single_blank_weight_variable,font=(FONT_NAME,16),
+            wraplength=80, justify="left")
 
     def entry(self):
         self.show_hide_single_blank_widgets(False)
@@ -120,37 +158,60 @@ class App:
     def enter_yinyu(self, event):
         self.show_hide_subject_widgets(False)
         self.show_hide_single_blank_widgets(True)
-        sql = "select * from english_words"
+        base_value = ENGLISH_SUBJECT*10**9 + WORDS_TYPE*10**7
+        sql = "select english_words.ID, SUBJECT, TYPE, TIMES, CORRECT, STATUS, WEIGHT, DES, WORD " \
+              "from english_words join exercise_info where" \
+              "(english_words.ID+%s)==exercise_info.ID order by WEIGHT " \
+              "DESC limit 20" % str(base_value)
+              
         self.exercises_list = cur.execute(sql).fetchall()
         self.exercises_num = len(self.exercises_list)
         self.current_num = -1  # 切回未开始, 掉next()会+1
-        self.next()
+        self.next_english_words()
 
 
-    def check_answer(self):
+    def check_english_words(self, ev=None):
         user_answer = self.single_blank_entry_answer.get()
+        self.data_single_blank_answer_times += 1
+
         # print(user_answer)
         self.data_single_blank_is_correct = \
             user_answer.strip() == self.data_single_blank_answer_string
-
         if self.data_single_blank_is_correct:
             correct_string = "Correct"
+            self.data_single_blank_correct_times += 1
             self.single_blank_label_answer.configure(fg="green")
         else:
             correct_string = "Wrong"
             self.single_blank_label_answer.configure(fg="red")
         self.data_single_blank_answer_variable.set("%s. The words is: %s" %
             (correct_string, self.data_single_blank_answer_string))
-        self.single_blank_label_answer.place(x=100, y=480, anchor='nw')
+        self.single_blank_label_answer.place(x=5, y=55, anchor='nw')
         if self.data_single_blank_is_lastone:
             # print("show return")
-            self.single_blank_button_return.place(x=900, y=480, anchor='nw')
+            self.single_blank_button_return.place(x=850, y=55, anchor='nw')
         else:
             # print("show next")
-            self.single_blank_button_next.place(x=900, y=480, anchor='nw')
+            self.single_blank_button_next.place(x=850, y=55, anchor='nw')
+        
+        if self.data_single_blank_is_correct:
+            if self.data_single_blank_is_lastone: 
+                self.single_blank_button_return.focus()
+            else:
+                self.single_blank_button_next.focus()
+        
+        new_id = ENGLISH_SUBJECT*10**9 + WORDS_TYPE*10**7 + self.data_single_blank_exercise_id
+        new_weight = self.calc_new_weight()
+        update_exercise_info_sql = \
+            "UPDATE exercise_info SET TIMES=?,CORRECT=?,WEIGHT=? WHERE ID=" + str(new_id)
+        data_4_exercise_info_sql = (self.data_single_blank_answer_times,
+            self.data_single_blank_correct_times, new_weight)
+        cur.execute(update_exercise_info_sql, data_4_exercise_info_sql)
+        conn.commit()
 
 
-    def next(self):
+    def next_english_words(self, ev=None):
+        # english_words.ID, SUBJECT, TYPE, TIMES, CORRECT, STATUS, WEIGHT, DES, WORD
         self.single_blank_button_next.place_forget()
         self.single_blank_button_return.place_forget()
         self.single_blank_label_answer.place_forget()
@@ -160,17 +221,38 @@ class App:
         self.data_single_blank_is_lastone = \
             self.current_num == self.exercises_num-1
         # print(self.current_num, self.exercises_num, self.data_single_blank_is_lastone)
-        exercise = self.exercises_list[self.current_num]
         
-        self.data_single_blank_stem_string = exercise[1]
+        exercise = self.exercises_list[self.current_num]
+        self.data_single_blank_exercise_id = exercise[0]
+        self.data_single_blank_stem_string = exercise[7]
         # 如果有值则删除它
         if self.single_blank_text_stem:
             self.single_blank_canvas_stem.delete(self.single_blank_text_stem)
         self.single_blank_text_stem = \
-            self.single_blank_canvas_stem.create_text((10, 10), 
-            text=self.data_single_blank_stem_string,
-            font=(FONT_NAME,16), anchor='nw', width=1000)
-        self.data_single_blank_answer_string = exercise[2]
+            self.single_blank_canvas_stem.create_text((0, 0), 
+                text=self.data_single_blank_stem_string,
+                font=(FONT_NAME,16), anchor='nw', width=760)
+        
+        self.data_single_blank_answer_string = exercise[8]
+        
+        # 获取题目的info
+        self.data_single_blank_answer_times = exercise[3]
+        self.data_single_blank_correct_times = exercise[4]
+        self.data_single_blank_weight = exercise[6]
+        
+        rate_value = self.get_correct_rate()
+        rate_value = round(rate_value*100,2)
+        answer_times_string    = "%d" % self.data_single_blank_answer_times
+        correct_times_string   = "%d" % self.data_single_blank_correct_times
+        weight_string          = "%.2f" % self.data_single_blank_weight
+        rate_string            = "%.2f%%" % rate_value
+
+        self.data_single_blank_answer_times_variable.set(answer_times_string)
+        self.data_single_blank_correct_variable.set(correct_times_string)
+        self.data_single_blank_correct_rate_variable.set(rate_string)
+        self.data_single_blank_weight_variable.set(weight_string)
+        
+        self.single_blank_entry_answer.focus()
 
 
     def show_hide_subject_widgets(self, is_show):
@@ -190,31 +272,72 @@ class App:
     def show_hide_single_blank_widgets(self, is_show):
         # 显示/隐藏 单项填空组件
         if is_show:
-            self.single_blank_label_type.place(x=100, y=50, anchor='nw')
-            # 如果有值则删除它
-            if self.single_blank_text_stem:
-                self.single_blank_canvas_stem.delete(self.single_blank_text_stem)
-            self.single_blank_text_stem = \
-                self.single_blank_canvas_stem.create_text((10, 10), 
-                    text=self.data_single_blank_stem_string,
-                    font=(FONT_NAME,16), anchor='nw', width=1000)
-            self.single_blank_canvas_stem.place(x=100,y=100)
-            self.single_blank_label_input.place(x=100, y=420, anchor='nw')
-            self.single_blank_entry_answer.place(x=300, y=422, anchor='nw')
-            self.single_blank_entry_answer.focus ()
-            self.single_blank_button_check.place(x=900, y=415, anchor='nw')
-            # 点击check_button才能显示
-            # self.single_blank_label_answer.place(x=100, y=580, anchor='nw')
-            # self.single_blank_button_next.place(x=1100, y=580, anchor='nw')
+            self.single_blank_stem_frame.place(x=50, y=30, anchor='nw')
+            self.single_blank_canvas_stem.place(x=10,y=5)
+            self.single_blank_input_frame.place(x=50, y=420, anchor='nw')
+            self.single_blank_entry_answer.place(x=5, y=5, anchor='nw')
+            self.single_blank_button_check.place(x=850, y=5, anchor='nw')
+            self.single_blank_counting_frame.place(x=900, y=30, anchor='nw')
+            self.single_blank_label_times.place(x=5, y=5, anchor='nw')
+            self.single_blank_value_times.place(x=125, y=5, anchor='nw')
+            self.single_blank_label_correct.place(x=5, y=35, anchor='nw')
+            self.single_blank_value_correct.place(x=125, y=35, anchor='nw')
+            self.single_blank_lable_rate.place(x=5, y=65, anchor='nw')
+            self.single_blank_value_rate.place(x=125, y=65, anchor='nw')
+            self.single_blank_lable_weight.place(x=5, y=95, anchor='nw')
+            self.single_blank_value_weight.place(x=125, y=95, anchor='nw')
         else:
-            self.single_blank_label_type.place_forget()
+            self.single_blank_stem_frame.place_forget()
             self.single_blank_canvas_stem.place_forget()
-            self.single_blank_label_input.place_forget()
+            self.single_blank_input_frame.place_forget()
             self.single_blank_entry_answer.place_forget()
             self.single_blank_button_check.place_forget()
             self.single_blank_label_answer.place_forget()
             self.single_blank_button_next.place_forget()
             self.single_blank_button_return.place_forget()
+            self.single_blank_counting_frame.place_forget()
+            self.single_blank_label_times.place_forget()
+            self.single_blank_label_correct.place_forget()
+            self.single_blank_lable_rate.place_forget()
+            self.single_blank_lable_weight.place_forget()
+            self.single_blank_value_times.place_forget()
+            self.single_blank_value_correct.place_forget()
+            self.single_blank_value_rate.place_forget()
+            self.single_blank_value_weight.place_forget()
+
+    def calc_new_weight(self):
+        times_weight = (1/2**self.data_single_blank_answer_times)*5
+        rate_value = self.get_correct_rate()
+        rate_weight = 8**(-math.log(rate_value+0.0001))-1
+        # print(times_weight, rate_weight)
+        return times_weight+rate_weight
+
+    '''
+    def fetch_exercise_info(self, subject_id, type_id, id):
+        new_id = subject_id*10**9 + type_id*10**7 + id
+        sql = "select * from exercise_info where ID=" + str(new_id)
+        exercise_infos = cur.execute(sql).fetchall()
+        num = len(exercise_infos)
+        if 1 != num:
+            print("----------Error-------- num = %d ------------" % num)
+        
+        exercise_info = exercise_infos[0]
+        times = exercise_info[3]
+        correct_times = exercise_info[4]
+        status = exercise_info[5]
+        weight = exercise_info[7]
+        
+        print(times, correct_times, status, weight)
+        return (times, correct_times, status, weight)
+    '''
+
+    def get_correct_rate(self):
+        if 0 == self.data_single_blank_answer_times:
+            rate_value = 0.0
+        else:
+            rate_value = float(self.data_single_blank_correct_times) \
+                        /float(self.data_single_blank_answer_times)
+        return rate_value
 
 
 if __name__ == '__main__':

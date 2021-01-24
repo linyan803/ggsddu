@@ -12,7 +12,7 @@ ccur = conn.cursor()
 
 SUBJECT_VALUE = 3 # 英语为3
 TYPE_VALUE = 1 # 单词题为1
-ENGLISG_WORDS_FILE = script_path+"/../data/english_words.xls"
+ENGLISG_WORDS_FILE = script_path+"/../raw/english/english_words.xls"
 
 
 def handle_english_words():
@@ -51,8 +51,8 @@ def new_english_words(id, des, word, note):
 
     new_id = SUBJECT_VALUE*10**9 + TYPE_VALUE*10**7 + id
     insert_new_exercise_info_sql = \
-        "INSERT INTO exercise_info(ID,SUBJECT,TYPE,TIMES,CORRECT,STATUS,NOTE) " \
-        "VALUES(?,'english','words',0,0,0,'')"
+        "INSERT INTO exercise_info(ID,SUBJECT,TYPE,TIMES,CORRECT,STATUS,NOTE,WEIGHT) " \
+        "VALUES(?,'english','words',0,0,0,'',0)"
     cur.execute(insert_new_exercise_info_sql,(new_id,))
     
     conn.commit()
