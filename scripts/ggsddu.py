@@ -106,7 +106,7 @@ class App:
         self.single_blank_input_frame = LabelFrame(self.root, text="Input words", 
             font=(FONT_NAME,20,'bold'), padx=5, pady=5, width=1100, height=150)
         self.single_blank_entry_answer = Entry(self.single_blank_input_frame, 
-            font=(FONT_NAME,20,'bold'), width=50)
+            font=(FONT_NAME,20,'bold'), width=48)
         self.single_blank_entry_answer.bind("<Return>", self.check_english_words)  # 解决回车问题
         self.single_blank_button_check = Button(self.single_blank_input_frame, text="Check", 
             command=self.check_english_words, font=(FONT_NAME,16,'bold'), width=16)
@@ -161,7 +161,7 @@ class App:
         base_value = ENGLISH_SUBJECT*10**9 + WORDS_TYPE*10**7
         sql = "select english_words.ID, SUBJECT, TYPE, TIMES, CORRECT, STATUS, WEIGHT, DES, WORD " \
               "from english_words join exercise_info where" \
-              "(english_words.ID+%s)==exercise_info.ID order by WEIGHT " \
+              "(english_words.ID+%s)==exercise_info.ID order by WEIGHT, english_words.ID " \
               "DESC limit 20" % str(base_value)
               
         self.exercises_list = cur.execute(sql).fetchall()
