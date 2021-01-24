@@ -229,7 +229,7 @@ class App:
         if self.single_blank_text_stem:
             self.single_blank_canvas_stem.delete(self.single_blank_text_stem)
         self.single_blank_text_stem = \
-            self.single_blank_canvas_stem.create_text((0, 0), 
+            self.single_blank_canvas_stem.create_text((2, 0), 
                 text=self.data_single_blank_stem_string,
                 font=(FONT_NAME,16), anchor='nw', width=760)
         
@@ -276,7 +276,7 @@ class App:
             self.single_blank_canvas_stem.place(x=10,y=5)
             self.single_blank_input_frame.place(x=50, y=420, anchor='nw')
             self.single_blank_entry_answer.place(x=5, y=5, anchor='nw')
-            self.single_blank_button_check.place(x=850, y=5, anchor='nw')
+            self.single_blank_button_check.place(x=850, y=2, anchor='nw')
             self.single_blank_counting_frame.place(x=900, y=30, anchor='nw')
             self.single_blank_label_times.place(x=5, y=5, anchor='nw')
             self.single_blank_value_times.place(x=125, y=5, anchor='nw')
