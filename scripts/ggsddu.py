@@ -72,7 +72,7 @@ class App:
         self.exercises_list = []
 
         self.init_widgets()
-        self.entry()
+        self.entry(None)
 
     def init_widgets(self):
                 # 进入科目入口
@@ -142,7 +142,7 @@ class App:
             self.data_single_blank_weight_variable,font=(FONT_NAME,16),
             wraplength=80, justify="left")
 
-    def entry(self):
+    def entry(self, event):
         self.show_hide_single_blank_widgets(False)
         self.show_hide_subject_widgets(True)
 
@@ -161,9 +161,8 @@ class App:
         base_value = ENGLISH_SUBJECT*10**9 + WORDS_TYPE*10**7
         sql = "select english_words.ID, SUBJECT, TYPE, TIMES, CORRECT, STATUS, WEIGHT, DES, WORD " \
               "from english_words join exercise_info where" \
-              "(english_words.ID+%s)==exercise_info.ID order by WEIGHT, english_words.ID " \
+              "(english_words.ID+%s)==exercise_info.ID order by WEIGHT DESC, english_words.ID " \
               "DESC limit 20" % str(base_value)
-              
         self.exercises_list = cur.execute(sql).fetchall()
         self.exercises_num = len(self.exercises_list)
         self.current_num = -1  # 切回未开始, 掉next()会+1
