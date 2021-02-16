@@ -17,57 +17,34 @@ import math
 import sqlite3
 import platform
 
-from tkinter import Tk, Radiobutton, Label
-from tkinter import StringVar
+from tkinter import Tk, Entry, Label
+from tkinter import IntVar
 from tkinter import BOTH
 from tkinter.font import Font
 from exercise_frame import ExerciseFrame
 from misc.constants import Subject
 
-class SingleChoice(ExerciseFrame):
+class SingleBlank(ExerciseFrame):
     def __init__(self, master, subject, font_name):
         super().__init__(master, subject, font_name)
-        self.choosen = StringVar()
         self.init_widgets()
 
     def init_widgets(self):
-        self._promopt_label = Label(self._input_frame, text="请选择:",
+        self._promopt_label = Label(self._input_frame, text="请填空:",
             font=self._my_font)
         self._promopt_label.place(x=10, y=7, anchor='nw')
-        self.choice_A = Radiobutton(
-            self._input_frame,
-            variable=self.choosen,
-            value='A',
-            fg='blue',
-            font=self._my_bold_font, 
-            text='A')
-        self.choice_A.place(x=160, y=7, anchor='nw')
-        self.choice_B = Radiobutton(
-            self._input_frame,
-            variable=self.choosen,
-            font=self._my_bold_font, 
-            value='B',
-            fg='blue',
-            text='B')
-        self.choice_B.place(x=240, y=7, anchor='nw')
-        self.choice_C = Radiobutton(
-            self._input_frame,
-            variable=self.choosen,
-            font=self._my_bold_font, 
-            value='C',
-            fg='blue',
-            text='C')
-        self.choice_C.place(x=320, y=7, anchor='nw')
-        self.choice_D = Radiobutton(
-            self._input_frame,
-            variable=self.choosen,
-            font=self._my_bold_font, 
-            value='D',
-            fg='blue',
-            text='D')
-        self.choice_D.place(x=400, y=7, anchor='nw')
+        self._entry_answer = Entry(self._input_frame, font=self._my_bold_font,
+            width=67, fg='blue')
+        self._entry_answer.place(x=85, y=10, anchor='nw')
+        self._entry_answer.bind("<Return>", self._check)  # 解决回车问题
+    
+    def _check(self):
+        answer_string = self._entry_answer.get().strip()
+        print("user click check and answer=", answer_string)
+        is_correct =self.exercise.check(answer_string)
 
-        self.choosen.set('A')
+        super()._check(is_correct)
+
 
 if __name__ == '__main__':
     # 创建主窗口
@@ -90,7 +67,7 @@ if __name__ == '__main__':
     root.geometry('%dx%d+%d+%d'%(width, heigh, (screenwidth-width)/2, (screenheight-heigh)/2))
     root.resizable(0,0) #防止用户调整尺寸
 
-    my_frame = SingleChoice(root, Subject.MATH, FONT_NAME)
+    my_frame = SingleBlank(root, Subject.MATH, FONT_NAME)
 
     #进入消息循环
     root.mainloop()

@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
+STUDENT = 'LIZHENZHEN'
+
 class Subject:
     CHINESE     = 1
     MATH        = 2
@@ -8,6 +10,36 @@ class Subject:
     PHYSICS     = 4
     BIOLOGY     = 5
     GEOGRAPHY   = 6
+    
+    @staticmethod
+    def get_num(input_string):
+        if 'CHINESE' == input_string:
+            return Subject.CHINESE
+        if 'MATH' == input_string:
+            return Subject.MATH 
+        if 'ENGLISH' == input_string:
+            return Subject.ENGLISH      
+        if 'PHYSICS' == input_string:
+            return Subject.PHYSICS
+        if 'BIOLOGY' == input_string:
+            return Subject.BIOLOGY
+        if 'GEOGRAPHY' == input_string:
+            return Subject.GEOGRAPHY
+
+    @staticmethod
+    def get_string(input_value):
+        if Subject.CHINESE == input_value:
+            return 'CHINESE'
+        if Subject.MATH == input_value:
+            return 'MATH'
+        if Subject.ENGLISH == input_value:
+            return 'ENGLISH'   
+        if Subject.PHYSICS == input_value:
+            return 'PHYSICS'
+        if Subject.BIOLOGY == input_value:
+            return 'BIOLOGY'
+        if Subject.GEOGRAPHY == input_value:
+            return 'GEOGRAPHY'
 
 
 class Model:
@@ -16,7 +48,8 @@ class Model:
     MULTI_BLANK      = 3
     MULTI_CHOICE     = 4
 
-class STEM_TYPE:
-    TEXT_IN_DB = 0
-    IMG_FILE   = 1
-    MD_IN_DB   = 2
+class STYLE:
+    TEXT_IN_DB = 1
+    IMG_FILE   = 2
+    MD_IN_DB   = 3
+    NOTHING    = 255

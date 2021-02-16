@@ -15,12 +15,15 @@ from tkinter import Canvas
 from tkinter import Entry
 from tkinter import Button
 from tkinter import StringVar
+
 # 常量
-from misc.constants import Subject, Model, STEM_TYPE
+from misc.constants import Subject, Model, STYLE, STUDENT
 from single_choice.single_choice import SingleChoice
+from single_blank.single_blank import SingleBlank
+from exercise.exercise import Exercise, ExerciseList
 
-
-SCRIPT_PATH = os.path.split(os.path.realpath(sys.argv[0]))[0]
+SCRIPT_PATH= os.path.dirname(os.path.abspath(__file__))
+# print(SCRIPT_PATH) # d:\Code\ggsddu\source
 
 class App:
     def __init__(self, root):
@@ -34,14 +37,18 @@ class App:
         self.subject_label_biology = None
         self.subject_label_geography = None
        
-        self.current_subject = ''        # 当前的科目
         self.exercise_list = None
-        self.cur_seq = 0                 # 当前题目在list中顺序
     
         # 根据题目类型得到题目的框架
-        self.model_frame = None          # 不同题型的框架
+        self.model_frame = None       # 不同题型的框架
 
         #
+        self.root.bind("<<check-correct>>", self.check_correct)
+        self.root.bind("<<check-wrong>>", self.check_correct)
+        self.root.bind("<<next>>", self.next)
+        self.root.bind("<<finish>>", 
+            lambda event:self.show_hide_subject_widgets(True))
+
         self.init_widgets()
         self.show_hide_subject_widgets(True)
 
@@ -118,19 +125,63 @@ class App:
             self.subject_label_geography.place_forget()
 
     def enter(self, subject):
-        global app
-        print("enter subject = %d" % subject)
+        global subject_conn, subject_cur   # 需要改变
+
         self.show_hide_subject_widgets(False)
+        self.subject = subject
+        
+        if subject_cur is not None:
+            subject_cur.close()
+        if subject_conn is not None:
+           subject_conn.close()
+
+        subject_db_string = SCRIPT_PATH + "/../database/" + \
+                            Subject.get_string(self.subject) + '.db'
+        subject_conn = sqlite3.connect(subject_db_string)
+        subject_cur = subject_conn.cursor()
+        
+        if self.exercise_list is not None:
+            del self.exercise_list
+
+        self.exercise_list = ExerciseList(
+            self.subject,
+            personal_conn,
+            personal_cur,
+            subject_conn,
+            subject_cur,
+            10)
+        self.exercise_list.generate_list()
         self.next()
-
+ 
     def next(self):
-        """
-        """
-        print("app next called")
-        self.model_frame = SingleChoice(root, FONT_NAME, self)
-        self.model_frame.show()
+        if self.model_frame is not None:
+            del self.model_frame
 
+        exercise = self.exercise_list.get_next()
+        if Model.SINGLE_CHOICE == exercise.model:
+            self.model_frame = SingleChoice(self.root, self.subject, FONT_NAME)
 
+        if Model.SINGLE_BLANK == exercise.model: 
+            self.model_frame = SingleBlank(self.root, self.subject, FONT_NAME)
+
+        self.model_frame.set_exercise(
+            exercise,
+            self.exercise_list.seq+1,
+            self.exercise_list.num)
+
+    def check_correct(self, event):
+        print("app check_correct called")
+        self.exercise_list.write_log(True)
+        self.update_personal()
+
+    def check_wrong(self, event):
+        print("app check_wrong called")
+        self.exercise_list.write_log(False)
+        self.update_personal()
+
+    def update_personal(self):
+        print("app update called")
+        # self.exercise_list.update()
 
 if __name__ == '__main__':
     # 创建主窗口
@@ -156,12 +207,10 @@ if __name__ == '__main__':
     # 建立App
     app = App(root)
 
-    personal_conn = sqlite3.connect(SCRIPT_PATH+"/../database/PERSONAL.db")
+    personal_conn = sqlite3.connect(SCRIPT_PATH+"/../database/LIZHENZHEN.db")
     personal_cur = personal_conn.cursor()
     subject_conn = None
     subject_cur = None
-
-    
 
     #进入消息循环
     root.mainloop()

@@ -1,35 +1,70 @@
-select english_words.ID, SUBJECT, TYPE, TIMES, CORRECT, STATUS, WEIGHT, DES,WORD from english_words join exercise_info where (en)==exercise_info.ID
-order by weight,english_words.ID DESC limit 20;
+MATH 数据库:
 
-CREATE TABLE exercise_info (
-SUBJECT INT8 NOT NULL,
-ID INT NOT NULL, 
-ITEM_NUM INT8,
-TIMES INT,
-CORRECT INT,
-STATUS INT8,
-NOTE VARCHAR(255), 
-WEIGHT REAL,
-CONSTRAINT PK PRIMARY KEY (SUBJECT,ID));
+CREATE TABLE "answer" (
+	"ID"	INTEGER NOT NULL UNIQUE,
+	"SUB_ID"	INTEGER NOT NULL,
+	"MODEL"	INTEGER NOT NULL,
+	"KEY"	TEXT NOT NULL,
+	"E_STYLE"	INTEGER,
+	"EXPLAIN"	TEXT,
+	PRIMARY KEY("ID","SUB_ID")
+)
+
+CREATE TABLE "stem" (
+	"ID"	INTEGER NOT NULL UNIQUE,
+	"MODEL"	INTEGER NOT NULL,
+	"D_STYLE"	INTEGER NOT NULL,
+	"DES"	TEXT NOT NULL,
+	"NODE"	TEXT,
+	PRIMARY KEY("ID" AUTOINCREMENT)
+)
+
+LIZHENZHEN 数据库:
+
+CREATE TABLE "exercise_info" (
+	"SUBJECT"	INTEGER NOT NULL,
+	"ID"	INTEGER NOT NULL,
+	"SUB_ID"	INTEGER NOT NULL,
+	"TIMES"	INTEGER NOT NULL DEFAULT 0,
+	"CORRECT"	INTEGER NOT NULL DEFAULT 0,
+	"WEIGHT"	REAL NOT NULL DEFAULT 2,
+	"STATUS"	INTEGER NOT NULL DEFAULT 0,
+	"NOTE"	TEXT,
+	PRIMARY KEY("SUBJECT","ID","SUB_ID")
+)
+
+CREATE TABLE "logs" (
+	"TIME_STAMP"	TEXT NOT NULL,
+	"ID"	INTEGER NOT NULL,
+	"SUB_ID"	INTEGER NOT NULL,
+	"CORRECT"	TEXT NOT NULL,
+	"NOTE"	TEXT,
+	PRIMARY KEY("TIME_STAMP","ID","SUB_ID")
+)
+
+           SELECT
+ 		       ID, SUB_ID, TIMES, CORRECT, WEIGHT, STATUS, NOTE 
+		   FROM 
+		       exercise_info 
+		   WHERE
+  		       SUBJECT=2
+           ORDER BY
+  		       WEIGHT,ID DESC 
+		   LIMIT 10
 
 
-CREATE TABLE update_info (
-ID INT PRIMARY KEY NOT NULL,
-UPDATE_DATE DATETIME, 
-NOTE VARCHAR(255));
+            SELECT
+                answer.ID AS id,
+                answer.SUB_ID AS sub_id,
+                answer.MODEL AS model,
+                answer.KEY AS key,
+                answer.E_STYLE AS e_style,
+                answer.EXPLAIN AS explain,
+                stem.D_STYLE AS d_style,
+                stem.DES AS stem 
+            FROM 
+                answer NATURAL JOIN stem
+            WHERE id=10 and sub_id=0
+			
 
-CREATE TABLE stem (
-ID INT PRIMARY KEY NOT NULL,
-MODEL INT8, 
-DES_STYLE INT8,
-DES TEXT);
-
-CREATE TABLE key (
-ID INT PRIMARY KEY NOT NULL,
-SUB_ID INT8,
-KEY  VARCHAR(255));
-
-CREATE TABLE answer (
-ID INT PRIMARY KEY NOT NULL,
-SUB_ID INT8,
-ANSWER  VARCHAR(8));
+			
