@@ -44,7 +44,7 @@ class App:
 
         #
         self.root.bind("<<check-correct>>", self.check_correct)
-        self.root.bind("<<check-wrong>>", self.check_correct)
+        self.root.bind("<<check-wrong>>", self.check_wrong)
         self.root.bind("<<next>>", self.next)
         self.root.bind("<<finish>>", 
             lambda event:self.show_hide_subject_widgets(True))
@@ -106,8 +106,12 @@ class App:
             lambda event:self.enter(Subject.GEOGRAPHY))
 
     def show_hide_subject_widgets(self, is_show):
+
         # 显示/隐藏 科目组件
         if is_show:
+            if self.model_frame is not None:
+                print("app show_hide_subject_widgets Called", is_show)
+                self.model_frame.pack_forget()
             self.subject_label_bkg.place(x=0, y=0, anchor='nw')
             self.subject_label_chinese.place(x=50, y=50, anchor='nw')
             self.subject_label_math.place(x=450, y=50, anchor='nw')
@@ -151,13 +155,16 @@ class App:
             subject_cur,
             10)
         self.exercise_list.generate_list()
-        self.next()
+        self.next(None)
  
-    def next(self):
+    def next(self, event):
+        print("app next called")
         if self.model_frame is not None:
+            self.model_frame.pack_forget()
             del self.model_frame
 
         exercise = self.exercise_list.get_next()
+
         if Model.SINGLE_CHOICE == exercise.model:
             self.model_frame = SingleChoice(self.root, self.subject, FONT_NAME)
 
@@ -170,18 +177,18 @@ class App:
             self.exercise_list.num)
 
     def check_correct(self, event):
-        print("app check_correct called")
+        # print("app check_correct called")
         self.exercise_list.write_log(True)
-        self.update_personal()
+        self.update_personal(self.model_frame.exercise)
 
     def check_wrong(self, event):
-        print("app check_wrong called")
+        # print("app check_wrong called")
         self.exercise_list.write_log(False)
-        self.update_personal()
+        self.update_personal(self.model_frame.exercise)
 
-    def update_personal(self):
-        print("app update called")
-        # self.exercise_list.update()
+    def update_personal(self, e):
+        # print("app update called")
+        self.exercise_list.update(e)
 
 if __name__ == '__main__':
     # 创建主窗口

@@ -36,9 +36,10 @@ class SingleBlank(ExerciseFrame):
         self._entry_answer = Entry(self._input_frame, font=self._my_bold_font,
             width=67, fg='blue')
         self._entry_answer.place(x=85, y=10, anchor='nw')
+        self._entry_answer.focus()
         self._entry_answer.bind("<Return>", self._check)  # 解决回车问题
     
-    def _check(self):
+    def _check(self, is_correct=False):
         answer_string = self._entry_answer.get().strip()
         print("user click check and answer=", answer_string)
         is_correct =self.exercise.check(answer_string)

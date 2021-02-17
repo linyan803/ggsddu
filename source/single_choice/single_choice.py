@@ -69,6 +69,13 @@ class SingleChoice(ExerciseFrame):
 
         self.choosen.set('A')
 
+    def _check(self, is_correct=False):
+        answer_string = self.choosen.get()
+        print("user click check and answer=", answer_string)
+        is_correct =self.exercise.check(answer_string)
+
+        super()._check(is_correct)
+
 if __name__ == '__main__':
     # 创建主窗口
     root = Tk()

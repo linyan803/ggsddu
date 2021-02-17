@@ -3,6 +3,16 @@
 
 STUDENT = 'LIZHENZHEN'
 
+def covert_choice_2_index(char):
+    if 'A' == char:
+        return 0
+    if 'B' == char:
+        return 1
+    if 'C' == char:
+        return 2
+    if 'D' == char:
+        return 3
+
 class Subject:
     CHINESE     = 1
     MATH        = 2

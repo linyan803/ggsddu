@@ -48,7 +48,7 @@ class Exercise:
             is_correct = (answer == self.key.strip())
         if is_correct:
             self.correct_times += 1
-
+ 
         self.answer_times += 1
         self.__calc_new_weight()
 
@@ -154,27 +154,30 @@ class ExerciseList:
                                     time.localtime(time.time()))
         
         values = (time_string, id, sub_id, str(is_correct))
-        print(values)
+        print("update log values is ", values)
         sql_string = "INSERT INTO logs (TIME_STAMP, ID, SUB_ID, CORRECT) " \
                      "VALUES(?,?,?,?)"
         self.p_cur.execute(sql_string, values)
         self.p_conn.commit()
 
-    def update(self):
+    def update(self, e):
         """
         将一条exercise的信息重新存储到数据库中
         """
-        if self.seq < self.num:
-            node_in_list = self.list[self.seq]
-        else:
-            return None
-                
-        # 获取这个科目的题目
-        sql_string = "select ID, SUB_ID, TIMES, CORRECT, WEIGHT, STATUS, " \
-            "NOTE from exercise_info where SUBJECT=" + str(self.subject) + \
-            " order by WEIGHT,ID limit 10;"
-
-        self.list = self.p_cur.execute(sql_string).fetchall()
+        # 
+        sql_string = "UPDATE exercise_info SET TIMES=?, CORRECT=?, WEIGHT=?" \
+                     " WHERE SUBJECT=? AND ID=? AND SUB_ID=?;"
+        values = (
+            e.answer_times,
+            e.correct_times,
+            e.weight,  
+            self.subject,  
+            e.id,
+            e.sub_id
+        )
+        print("update exercise_info values is", values)
+        self.p_cur.execute(sql_string, values)
+        self.p_conn.commit()
 
 
 if __name__ == '__main__':
