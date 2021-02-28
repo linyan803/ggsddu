@@ -134,7 +134,7 @@ class ExerciseList:
         # 获取这个科目的题目
         sql_string = "select ID, SUB_ID, TIMES, CORRECT, WEIGHT, STATUS, " \
             "NOTE from exercise_info where SUBJECT=" + str(self.subject) + \
-            " order by WEIGHT,ID limit 10;"
+            " order by WEIGHT DESC,ID DESC limit 10;"
 
         self.list = self.p_cur.execute(sql_string).fetchall()
         self.num = len(self.list)

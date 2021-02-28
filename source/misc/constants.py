@@ -3,6 +3,7 @@
 
 STUDENT = 'LIZHENZHEN'
 
+
 def covert_choice_2_index(char):
     if 'A' == char:
         return 0
@@ -13,13 +14,14 @@ def covert_choice_2_index(char):
     if 'D' == char:
         return 3
 
+
 class Subject:
-    CHINESE     = 1
-    MATH        = 2
-    ENGLISH     = 3
-    PHYSICS     = 4
-    BIOLOGY     = 5
-    GEOGRAPHY   = 6
+    CHINESE = 1
+    MATH = 2
+    ENGLISH = 3
+    PHYSICS = 4
+    BIOLOGY = 5
+    GEOGRAPHY = 6
     
     @staticmethod
     def get_num(input_string):
@@ -53,13 +55,14 @@ class Subject:
 
 
 class Model:
-    SINGLE_BLANK     = 1
-    SINGLE_CHOICE    = 2
-    MULTI_BLANK      = 3
-    MULTI_CHOICE     = 4
+    SINGLE_BLANK = 1
+    SINGLE_CHOICE = 2
+    MULTI_BLANK = 3
+    MULTI_CHOICE = 4
+
 
 class STYLE:
     TEXT_IN_DB = 1
-    IMG_FILE   = 2
-    MD_IN_DB   = 3
-    NOTHING    = 255
+    IMG_FILE = 2
+    MD_IN_DB = 3
+    NOTHING = 255
