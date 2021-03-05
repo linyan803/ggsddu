@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
+print("5. Constants loaded")
 STUDENT = 'LIZHENZHEN'
 
 

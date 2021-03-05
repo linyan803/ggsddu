@@ -19,12 +19,13 @@ SCRIPT_PATH= os.path.dirname(os.path.abspath(__file__))
 
 ANSWER_PSEUDO = '李蓁蓁, 加油！'
 
+
 class ExerciseFrame(Frame):
     def __init__(self, master, subject, font_name):
         super().__init__(master)
         self.master = master
         self.subject = subject
-        self.pack(fill=BOTH, expand=1)                         # 自身Frame最大化
+        self.pack(fill=BOTH, expand=1)              # 自身Frame最大化
 
         # counting 显示信息
         # self._answer_times = 0                    # 做过几次

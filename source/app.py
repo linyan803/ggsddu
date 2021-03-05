@@ -9,8 +9,9 @@ import platform
 
 from tkinter import Tk
 from PIL import Image, ImageTk
-from tkinter import LabelFrame
+from tkinter import Frame, Toplevel
 from tkinter import Label
+from tkinter import X
 from tkinter import Canvas
 from tkinter import Entry
 from tkinter import Button
@@ -22,16 +23,17 @@ from single_choice.single_choice import SingleChoice
 from single_blank.single_blank import SingleBlank
 from exercise.exercise import Exercise, ExerciseList
 
-SCRIPT_PATH= os.path.dirname(os.path.abspath(__file__))
-# print(SCRIPT_PATH) # d:\Code\ggsddu\source
+SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
+print("1. the script path is ", SCRIPT_PATH)  # d:\Code\ggsddu\source
 
 global photo_bkg, photo_chinese, photo_math, photo_english
 global photo_physics, photo_biology, photo_geography
 
 
 class App:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, the_root):
+        print("4. App init now ")
+        self.root = the_root
         self.subject_label_bkg = None
         # 所有科目
         self.subject_label_chinese = None
@@ -77,7 +79,10 @@ class App:
         image_geography = Image.open(SCRIPT_PATH+"/../resource/dili.png")
         photo_geography = ImageTk.PhotoImage(image_geography)
     
-        self.subject_label_bkg = Label(self.root,text='',image=photo_bkg)
+        self.subject_label_bkg = Label(
+            self.root,
+            text='',
+            image=photo_bkg)
 
         self.subject_label_chinese = Label(self.root, image=photo_chinese, cursor="spraycan")
         self.subject_label_chinese.bind(
@@ -198,6 +203,7 @@ class App:
 
 
 if __name__ == '__main__':
+    print("2. Now main start ")
     # 创建主窗口
     root = Tk()
     root.title('The notebook of wrong questions for Li Zhenzhen')
@@ -222,6 +228,7 @@ if __name__ == '__main__':
     root.resizable(0, 0)  # 防止用户调整尺寸
 
     # 建立App
+    print("3. Create App ")
     app = App(root)
 
     personal_conn = sqlite3.connect(SCRIPT_PATH+"/../database/LIZHENZHEN.db")
