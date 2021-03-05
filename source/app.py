@@ -227,11 +227,11 @@ if __name__ == '__main__':
                    (screenheight-height)/2))
     root.resizable(0, 0)  # 防止用户调整尺寸
 
-    # 建立App
+    # 建立AppPERSONAL
     print("3. Create App ")
     app = App(root)
 
-    personal_conn = sqlite3.connect(SCRIPT_PATH+"/../database/LIZHENZHEN.db")
+    personal_conn = sqlite3.connect(SCRIPT_PATH+"/../database/PERSONAL.db")
     personal_cur = personal_conn.cursor()
     subject_conn = None
     subject_cur = None
