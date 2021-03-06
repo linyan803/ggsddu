@@ -16,7 +16,7 @@ LOG_FORMAT = '%(asctime)s %(filename)s[line:%(lineno)d]"' \
 class Log:
     # 初始化日志
     def __init__(self):
-        self.name = "ggsddu"
+        self.name = "start"
         log_path = SCRIPT_PATH + "/../../logs"
         log_file_name = self.name + '.log'
         self.log_file = log_path + '/' + log_file_name
