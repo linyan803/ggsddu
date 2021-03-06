@@ -14,7 +14,7 @@ import os
 import datetime
 import sqlite3
 import platform
-import subprocess
+import time
 
 from tkinter import Tk, Text
 from tkinter import RIGHT, Y, END, ALL
@@ -179,6 +179,12 @@ class StartWindow:
             if self.is_exception:
                 print("出错了")
             else:
+                history_file = SCRIPT_PATH + '/history.list'
+                with open(history_file, 'a') as f:
+                    now_string = time.strftime(
+                        '%Y%m%d%H%M%S',
+                        time.localtime(time.time()))
+                    f.write(now_string+'\n')
                 root.destroy()
 
 
