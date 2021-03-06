@@ -65,6 +65,7 @@ class StartWindow:
     def _git_ggsddu(self):
         # 1. git 主目录
         os.popen('cd '+SCRIPT_PATH)
+        os.popen('cd ..')
         result = os.popen('git pull')
         responses = result.read()
         for line in responses.splitlines():
@@ -87,8 +88,9 @@ class StartWindow:
     @staticmethod
     def _check_history_file(history_file):
         is_exist = os.path.exists(history_file)
-        with open(history_file, 'w') as f:
-            f.write("20201210102234\n")
+        if not is_exist:
+            with open(history_file, 'w') as f:
+                f.write("20201210102234\n")
 
     def _get_new_exercise_list(self):
         # 读取history.list中最后一行的日期, 没有即为0
