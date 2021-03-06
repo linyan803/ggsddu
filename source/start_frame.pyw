@@ -212,6 +212,8 @@ class StartWindow:
 
 if __name__ == '__main__':
     # 创建主窗口
+    log.info("Script is %s, Script Dir is %s" %
+             (os.path.abspath(__file__), SCRIPT_PATH))
     root = Tk()
     root.title('The notebook of wrong questions for Li Zhenzhen')
 
@@ -241,8 +243,8 @@ if __name__ == '__main__':
 
     # 进入消息循环
     root.mainloop()
-    log.info("start frame quit")
     command = 'python ' + SCRIPT_PATH + '/app.py'
-    res = os.popen(command)
-    info_list = res.read().splitlines()
-    log.info(info_list)
+    log.info("start frame quit and run %s" % command)
+    res_run = os.popen(command)
+    run_info_list = res_run.read().splitlines()
+    log.info(run_info_list)
