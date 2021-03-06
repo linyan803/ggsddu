@@ -5,48 +5,181 @@
 GGSDDU 的启动程序
 1. git 主目录
 2. 获取当前登录用户名，当前登录用户名即数据库文件名
-3. 检查数据库文件如果不存在，那么创建数据库文件
-4. 读取history.list中最后一行的日期, 没有即为0
-5. 将PERSONAL.db中晚于上面日期的条目插入到新建数据库中
+   检查数据库文件如果不存在，那么创建数据库文件
+3. 读取history.list中最后一行的日期, 没有即为0
+   将PERSONAL.db中晚于上面日期的条目插入到新建数据库中
 """
 
 import os
-
+import datetime
 import sqlite3
 import platform
+import subprocess
 
-from tkinter import Tk, Text, Scrollbar
-from tkinter import RIGHT, Y, END
+from tkinter import Tk, Text
+from tkinter import RIGHT, Y, END, ALL
 from tkinter.font import Font
+from shutil import copyfile  # for 文件拷贝
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
+MAX_LINES = 14  # 界面仅能显示12行
+WAIT_TIME = 1000
 
 
 class StartWindow:
     def __init__(self, the_root, font_name):
         self.root = the_root
-        self.my_font = Font(family=font_name, size=12)  # 部分按钮字体小一点
+        self.my_font = Font(family=font_name, size=12)
+        self.db_file = None
         self.show_text = Text(
             self.root,
-            font=self.my_font
+            bg='darkgray',  # darkslategray
+            fg='black',
+            font=self.my_font,
+            relief='ridge',
+            spacing1=3,
+            spacing2=3,
+            spacing3=3
         )
+        self.show_text.pack(side="left", fill="both", expand=True)
+        self.step_count = 0
+        self.lines = []
+        self._insert_line("正在初始化GGSDDU，请稍后")
+        self._new_exercise_list = []
+        self.is_exception = False
 
-        self.scroll = Scrollbar()
-        # 放到窗口的右侧, 填充Y竖直方向
-        self.scroll.pack(side=RIGHT, fill=Y)
+        self.show_text.after(WAIT_TIME, self._auto_step)
 
-        # 两个控件关联
-        self.scroll.config(command=self.show_text.yview)
-        self.show_text.config(yscrollcommand=self.scroll.set)
-        self.show_text.pack()
+    def _insert_line(self, line):
+        if MAX_LINES == len(self.lines):
+            del self.lines[0]
+        self.lines.append(line)
 
-        self.git_ggsddu()
+        all_text = ''
+        for line in self.lines:
+            all_text += ' ' + line + '\n'
 
-    def git_ggsddu(self):
+        self.show_text.delete(1.0, END)
+        self.show_text.insert(1.0, all_text[:-1])
+
+    def _git_ggsddu(self):
+        # 1. git 主目录
+        os.popen('cd '+SCRIPT_PATH)
         result = os.popen('git pull')
         responses = result.read()
         for line in responses.splitlines():
-            self.show_text.insert(END, line+'\n')
+            self._insert_line(line)
+
+    def _check_personal_database(self):
+        # 2. 获取当前登录用户名，当前登录用户名即数据库文件名
+        #    检查数据库文件如果不存在，那么创建数据库文件
+        user_name = os.getlogin()
+        self.db_file = SCRIPT_PATH + '/../database/' + user_name + '.db'
+        if os.path.exists(self.db_file):
+            self._insert_line("个人数据库(%s)已存在" % self.db_file)
+        else:
+            self._insert_line("创建个人数据库(%s)" % self.db_file)
+            copyfile(
+                src=SCRIPT_PATH + '/../database/PERSONAL.db',
+                dst=self.db_file
+            )
+
+    def _get_new_exercise_list(self):
+        # 读取history.list中最后一行的日期, 没有即为0
+        # 将PERSONAL.db中晚于上面日期的条目插入到新建数据库中
+        history_file = SCRIPT_PATH + '/history.list'
+        with open(history_file, 'r') as f:
+            all_history = f.readlines()
+            last_line = all_history[len(all_history)-1]
+            last_line = last_line.strip()
+
+        last_update_time = datetime.datetime.strptime(
+            last_line.split("\n")[0],
+            "%Y%m%d%H%M%S"
+        )
+        last_update_time_string =\
+            datetime.datetime.strftime(
+                last_update_time,
+                '%Y.%m.%d %H:%M:%S')
+        db_file = SCRIPT_PATH + '/../database/PERSONAL.db'
+        personal_conn = sqlite3.connect(db_file)
+        personal_cur = personal_conn.cursor()
+        sql_string = "select * from exercise_info where TIME_STAMP > ?"
+        self._new_exercise_list = personal_cur.execute(
+            sql_string,
+            (last_update_time_string,)).fetchall()
+        personal_cur.close()
+        personal_conn.close()
+
+        return len(self._new_exercise_list)
+
+    @staticmethod
+    def _tuple_2_string(input_tuple):
+        return_string = ''
+        for item in input_tuple:
+            return_string += str(item) + ', '
+        return return_string[:-1]
+
+    def _insert_new_exercises(self):
+        print("_insert_new_exercises num=", len(self._new_exercise_list))
+        personal_conn = sqlite3.connect(self.db_file)
+        personal_cur = personal_conn.cursor()
+        insert_sql_string = "insert into exercise_info " \
+                            "(SUBJECT, ID, SUB_ID, TIMES, CORRECT, " \
+                            "WEIGHT, STATUS, NOTE, TIME_STAMP) "\
+                            "values (?,?,?,?,?,?,?,?,?)"
+        query_sql_string = "select * from exercise_info " \
+                           "where SUBJECT=? and ID=? and SUB_ID=?"
+
+        for exercise in self._new_exercise_list:
+            # 先查这个exercise是否存在
+            subject = exercise[0]
+            id = exercise[1]
+            sub_id = exercise[2]
+            all_query = personal_cur.execute(
+                query_sql_string,
+                (subject, id, sub_id)).fetchall()
+            if 1 == len(all_query):  # 已存在
+                self._insert_line(
+                    self._tuple_2_string(all_query[0]) + " already exist!")
+                continue
+
+            self._insert_line(
+                " insert exercise " + self._tuple_2_string(exercise))
+            personal_cur.execute(
+                insert_sql_string,
+                exercise)
+
+        personal_conn.commit()
+        personal_cur.close()
+        personal_conn.close()
+
+    def _auto_step(self):
+        self.step_count += 1
+        if 1 == self.step_count:
+            self._insert_line("1. 检查和更新程序")
+            self._git_ggsddu()
+            self.show_text.after(WAIT_TIME, self._auto_step)
+        if 2 == self.step_count:
+            self._insert_line("2. 检查个人数据库是否存在")
+            self._check_personal_database()
+            self.show_text.after(WAIT_TIME, self._auto_step)
+        if 3 == self.step_count:
+            self._insert_line("3. 检查数据库更新")
+            num = self._get_new_exercise_list()
+            print(num)
+            if 0 == num:
+                self.step_count += 1  # 跳过下一步
+            self.show_text.after(WAIT_TIME, self._auto_step)
+        if 4 == self.step_count:
+            self._insert_line("4. 更新题目")
+            self._insert_new_exercises()
+            self.show_text.after(WAIT_TIME, self._auto_step)
+        if 5 == self.step_count:
+            if self.is_exception:
+                print("出错了")
+            else:
+                root.destroy()
 
 
 if __name__ == '__main__':
@@ -64,15 +197,14 @@ if __name__ == '__main__':
         print('Can only support windows and linux')
 
     width = 600
-    height = 400
+    height = 385
     screenwidth = root.winfo_screenwidth()
     screenheight = root.winfo_screenheight()
     root.geometry('%dx%d+%d+%d' %
                   (width, height,
                    (screenwidth-width)/2,
                    (screenheight-height)/2))
-    root.resizable(0, 0)  # 防止用户调整尺寸
-
+    root.overrideredirect(True)
     # 建立App
     app = StartWindow(root, FONT_NAME)
 
@@ -81,3 +213,5 @@ if __name__ == '__main__':
 
     # 进入消息循环
     root.mainloop()
+    print("start frame quit")
+    os.system('python app.py')
