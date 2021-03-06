@@ -236,13 +236,15 @@ if __name__ == '__main__':
                    (screenheight-height)/2))
     root.overrideredirect(True)
     # 建立App
-    app = StartWindow(root, FONT_NAME)
+    start = StartWindow(root, FONT_NAME)
 
     # personal_conn = sqlite3.connect(SCRIPT_PATH+"/../database/LIZHENZHEN.db")
     # personal_cur = personal_conn.cursor()
 
     # 进入消息循环
     root.mainloop()
+
+    # 执行主程序
     command = 'python ' + SCRIPT_PATH + '/app.py'
     log.info("start frame quit and run %s" % command)
     res_run = os.popen(command)
