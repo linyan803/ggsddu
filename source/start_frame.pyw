@@ -227,4 +227,5 @@ if __name__ == '__main__':
     # 进入消息循环
     root.mainloop()
     print("start frame quit")
-    os.system('python app.py')
+    command = 'python ' + SCRIPT_PATH + '/app.py'
+    os.system(command)
