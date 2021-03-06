@@ -21,7 +21,7 @@ from tkinter import RIGHT, Y, END, ALL
 from tkinter.font import Font
 from shutil import copyfile  # for 文件拷贝
 
-from source.misc.log import Log
+from misc.log import Log
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_LINES = 14  # 界面仅能显示12行
