@@ -84,10 +84,17 @@ class StartWindow:
                 dst=self.db_file
             )
 
+    @staticmethod
+    def _check_history_file(history_file):
+        is_exist = os.path.exists(history_file)
+        with open(history_file, 'w') as f:
+            f.write("20201210102234\n")
+
     def _get_new_exercise_list(self):
         # 读取history.list中最后一行的日期, 没有即为0
         # 将PERSONAL.db中晚于上面日期的条目插入到新建数据库中
         history_file = SCRIPT_PATH + '/history.list'
+        self._check_history_file(history_file)
         with open(history_file, 'r') as f:
             all_history = f.readlines()
             last_line = all_history[len(all_history)-1]
