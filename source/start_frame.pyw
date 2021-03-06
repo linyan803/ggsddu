@@ -26,11 +26,11 @@ from misc.log import Log
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_LINES = 14  # 界面仅能显示12行
 WAIT_TIME = 1000
+log = Log()
 
 
 class StartWindow:
     def __init__(self, the_root, font_name):
-        self.log = Log()
         self.root = the_root
         self.my_font = Font(family=font_name, size=12)
         self.db_file = None
@@ -55,7 +55,7 @@ class StartWindow:
 
     def _insert_line(self, line):
         if len(line) > 0:
-            self.log.info(line)
+            log.info(line)
         else:
             return
 
@@ -199,7 +199,7 @@ class StartWindow:
             self.show_text.after(WAIT_TIME, self._auto_step)
         if 5 == self.step_count:
             if self.is_exception:
-                print("出错了")
+                self._insert_line("出错了")
             else:
                 history_file = SCRIPT_PATH + '/history.list'
                 with open(history_file, 'a') as f:
@@ -241,6 +241,8 @@ if __name__ == '__main__':
 
     # 进入消息循环
     root.mainloop()
-    print("start frame quit")
+    log.info("start frame quit")
     command = 'python ' + SCRIPT_PATH + '/app.py'
-    os.system(command)
+    res = os.popen(command)
+    info_list = res.read().splitlines()
+    log.info(info_list)
