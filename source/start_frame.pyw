@@ -21,6 +21,8 @@ from tkinter import RIGHT, Y, END, ALL
 from tkinter.font import Font
 from shutil import copyfile  # for 文件拷贝
 
+from source.misc.log import Log
+
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_LINES = 14  # 界面仅能显示12行
 WAIT_TIME = 1000
@@ -28,6 +30,7 @@ WAIT_TIME = 1000
 
 class StartWindow:
     def __init__(self, the_root, font_name):
+        self.log = Log()
         self.root = the_root
         self.my_font = Font(family=font_name, size=12)
         self.db_file = None
@@ -51,6 +54,11 @@ class StartWindow:
         self.show_text.after(WAIT_TIME, self._auto_step)
 
     def _insert_line(self, line):
+        if len(line) > 0:
+            self.log.info(line)
+        else:
+            return
+
         if MAX_LINES == len(self.lines):
             del self.lines[0]
         self.lines.append(line)
@@ -64,11 +72,13 @@ class StartWindow:
 
     def _git_ggsddu(self):
         # 1. git 主目录
-        os.popen('cd '+SCRIPT_PATH)
-        os.popen('cd ..')
-        result = os.popen('git pull')
-        responses = result.read()
-        for line in responses.splitlines():
+        command_string = "cd " + SCRIPT_PATH+"\\.. &" \
+                         "cd &" \
+                         "git pull\n"
+        res = os.popen(command_string)
+        info_list = res.read().splitlines()
+        for line in info_list:
+            # print("show %s to text" % line)
             self._insert_line(line)
 
     def _check_personal_database(self):
@@ -85,11 +95,12 @@ class StartWindow:
                 dst=self.db_file
             )
 
-    @staticmethod
-    def _check_history_file(history_file):
+    def _check_history_file(self, history_file):
         is_exist = os.path.exists(history_file)
+        self._insert_line("历史文件%s存在？%s" % (history_file, str(is_exist)))
         if not is_exist:
             with open(history_file, 'w') as f:
+                self._insert_line("新建历史文件，写入20201210102234")
                 f.write("20201210102234\n")
 
     def _get_new_exercise_list(self):
@@ -101,6 +112,7 @@ class StartWindow:
             all_history = f.readlines()
             last_line = all_history[len(all_history)-1]
             last_line = last_line.strip()
+            self._insert_line("获取上次更新时间为%s" % last_line)
 
         last_update_time = datetime.datetime.strptime(
             last_line.split("\n")[0],
@@ -117,10 +129,12 @@ class StartWindow:
         self._new_exercise_list = personal_cur.execute(
             sql_string,
             (last_update_time_string,)).fetchall()
+        num = len(self._new_exercise_list)
+        self._insert_line("获取更新的题目%d个" % num)
         personal_cur.close()
         personal_conn.close()
 
-        return len(self._new_exercise_list)
+        return num
 
     @staticmethod
     def _tuple_2_string(input_tuple):
@@ -130,7 +144,7 @@ class StartWindow:
         return return_string[:-1]
 
     def _insert_new_exercises(self):
-        print("_insert_new_exercises num=", len(self._new_exercise_list))
+        # print("_insert_new_exercises num=", len(self._new_exercise_list))
         personal_conn = sqlite3.connect(self.db_file)
         personal_cur = personal_conn.cursor()
         insert_sql_string = "insert into exercise_info " \
@@ -150,11 +164,11 @@ class StartWindow:
                 (subject, id, sub_id)).fetchall()
             if 1 == len(all_query):  # 已存在
                 self._insert_line(
-                    self._tuple_2_string(all_query[0]) + " already exist!")
+                    self._tuple_2_string(all_query[0]) + " 已存在")
                 continue
 
             self._insert_line(
-                " insert exercise " + self._tuple_2_string(exercise))
+                " 插入新题目  " + self._tuple_2_string(exercise))
             personal_cur.execute(
                 insert_sql_string,
                 exercise)
@@ -176,7 +190,6 @@ class StartWindow:
         if 3 == self.step_count:
             self._insert_line("3. 检查数据库更新")
             num = self._get_new_exercise_list()
-            print(num)
             if 0 == num:
                 self.step_count += 1  # 跳过下一步
             self.show_text.after(WAIT_TIME, self._auto_step)
