@@ -203,7 +203,6 @@ class App:
 
 
 if __name__ == '__main__':
-    print("2. Now main start ")
     # 创建主窗口
     root = Tk()
     root.title('The notebook of wrong questions for Li Zhenzhen')
