@@ -2,15 +2,17 @@
 # -*- coding: UTF-8 -*-
 
 """
-GGSDDU 的启动程序
+ggsd.edu 的启动程序
 1. git 主目录
 2. 获取当前登录用户名，当前登录用户名即数据库文件名
-   检查数据库文件如果不存在，那么创建数据库文件
-3. 读取history.list中最后一行的日期, 没有即为0
+   检查数据库文件如果不存在，那么把PERSONAL数据库文件拷贝一份作为用户数据库文件
+   用户数据库文件不随git变化，保存用户自己的做题信息
+3. 读取history.list中最后一行的日期
    将PERSONAL.db中晚于上面日期的条目插入到新建数据库中
 """
 
 import os
+import logging
 import datetime
 import sqlite3
 import platform
@@ -21,11 +23,73 @@ from tkinter import RIGHT, Y, END, ALL
 from tkinter.font import Font
 from shutil import copyfile  # for 文件拷贝
 
-from misc.log import Log
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_LINES = 14  # 界面仅能显示12行
 WAIT_TIME = 100
+
+LOG_FORMAT = '%(asctime)s %(filename)s[line:%(lineno)d]"' \
+             '" %(levelname)s:  %(message)s'
+
+
+class Log:
+    # 初始化日志
+    def __init__(self):
+        self.name = "start"
+        log_path = SCRIPT_PATH + "/../logs"
+        log_file_name = self.name + '.log'
+        self.log_file = log_path + '/' + log_file_name
+        # print(self.log_file)
+        # 日志的输出格式
+        logging.basicConfig(
+            level=logging.INFO,
+            # 级别：CRITICAL > ERROR > WARNING > INFO > DEBUG，默认级别为 WARNING
+            format=LOG_FORMAT,
+            datefmt='%Y-%m-%d %H:%M:%S',
+            filename=self.log_file,
+            filemode='a')
+
+    @staticmethod
+    def _log_with_level(string, level):
+        # 只支持info和error
+        if logging.INFO == level:
+            logging.info(string)
+        if logging.ERROR == level:
+            logging.error(string)
+
+    def _split_type(self, content, level):
+        # 能处理 字符串，tuple，list三种
+        if isinstance(content, str):
+            # print("I am string")
+            self._log_with_level(content, level)
+        if isinstance(content, tuple):
+            # print("I am tuple")
+            all_text = ''
+            for item in content:
+                all_text += str(item) + ', '
+            all_text = all_text[:-2] + '\n'
+            # print(all_text)
+            self._log_with_level(all_text, level)
+
+        if isinstance(content, list):
+            # print("I am list")
+            for line in content:
+                self._log_with_level(line, level)
+
+    def info(self, content):
+        if len(content) > 0:
+            self._split_type(content, logging.INFO)
+        else:
+            print("log info empty")
+
+    def error(self, content):
+        if len(content) > 0:
+            self._split_type(content, logging.ERROR)
+        else:
+            print("log error empty")
+
+
+# 全脚本使用
 log = Log()
 
 
