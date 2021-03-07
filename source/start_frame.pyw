@@ -25,7 +25,7 @@ from misc.log import Log
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_LINES = 14  # 界面仅能显示12行
-WAIT_TIME = 1000
+WAIT_TIME = 100
 log = Log()
 
 

@@ -18,7 +18,7 @@ from tkinter import Button
 from tkinter import StringVar
 
 # 常量
-from misc.constants import Subject, Model, STYLE, STUDENT
+from misc.constants import Subject, Model, STYLE
 from single_choice.single_choice import SingleChoice
 from single_blank.single_blank import SingleBlank
 from exercise.exercise import Exercise, ExerciseList
@@ -230,7 +230,9 @@ if __name__ == '__main__':
     print("3. Create App ")
     app = App(root)
 
-    personal_conn = sqlite3.connect(SCRIPT_PATH+"/../database/PERSONAL.db")
+    user_name = os.getlogin()
+    db_file = SCRIPT_PATH+"/../database/" + user_name + ".db"
+    personal_conn = sqlite3.connect(db_file)
     personal_cur = personal_conn.cursor()
     subject_conn = None
     subject_cur = None

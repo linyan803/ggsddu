@@ -17,7 +17,7 @@ import time
 import math
 import sqlite3
 
-from misc.constants import Model, Subject, STUDENT
+from misc.constants import Model, Subject
 
 class Exercise:
     def __init__(self, id, sub_id, answer_times, correct_times, weight,

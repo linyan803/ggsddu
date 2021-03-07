@@ -27,7 +27,7 @@ from PIL import Image, ImageTk
 from shutil import copyfile  # for 文件拷贝
 
 # 常量
-from source.misc.constants import Subject, Model, STYLE, STUDENT
+from source.misc.constants import Subject, Model, STYLE
 from source.misc.constants import covert_choice_2_index
 
 global photo_stem, photo_ana, photo_previous, photo_next,\
@@ -50,7 +50,7 @@ class InputWindow(Frame):
         self.db_subject_conn = None
         self.db_subject_cur = None
         self.db_personal_conn = sqlite3.connect(
-            ROOT_PATH + "/database/" + STUDENT + ".db")
+            ROOT_PATH + "/database/PERSONAL.db")
         self.db_personal_cur = self.db_personal_conn.cursor()
 
         self.exercise_list = None  # 查询到的习题列表
@@ -755,11 +755,13 @@ class InputWindow(Frame):
 
         subject_string = self.tree_selection['subject']
         subject_value = Subject.get_num(subject_string)
-        values = (subject_value, id_value, sub_id, 0, 0, 2.0, 0, '')
+        values = (subject_value, id_value, sub_id, 0, 0, 2.0, 0, '',
+                  time_string)
         print("person: ", values)
-        insert_personal_sql = "insert into exercise_info (SUBJECT, ID, " \
-                              "SUB_ID, TIMES, CORRECT, WEIGHT, STATUS, NOTE) " \
-                              "values (?,?,?,?,?,?,?,?)"
+        insert_personal_sql = \
+            "insert into exercise_info (SUBJECT, ID, SUB_ID, " \
+            "TIMES, CORRECT, WEIGHT, STATUS, NOTE, TIME_STAMP) " \
+            "values (?,?,?,?,?,?,?,?,?)"
         self.db_personal_cur.execute(insert_personal_sql, values)
 
         self.db_subject_conn.commit()

@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 
 print("5. Constants loaded")
-STUDENT = 'LIZHENZHEN'
 
 
 def covert_choice_2_index(char):
